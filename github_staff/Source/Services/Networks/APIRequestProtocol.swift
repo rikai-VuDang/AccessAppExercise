@@ -30,7 +30,7 @@ extension APIRequestProtocol {
     }
 
     var request: URLRequest {
-        var url = URL(string: "https://api.github.com")!
+        var url = URL(string: Enviroment.host)!
         url.appendPathComponent(path)
         var request = URLRequest(url: url)
         request.httpMethod = method.rawValue
