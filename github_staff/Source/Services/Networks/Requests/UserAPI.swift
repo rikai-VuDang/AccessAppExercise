@@ -9,7 +9,7 @@ import Foundation
 import Alamofire
 
 enum UserAPI: URLRequestConvertible, APIRequestProtocol {
-    case list(since: Int = 0)
+    case list(since: Int, limit: Int)
     case detail(id: String)
     
     var method: HTTPMethod {
@@ -27,8 +27,8 @@ enum UserAPI: URLRequestConvertible, APIRequestProtocol {
     
     var params: Parameters? {
         switch self {
-        case .list:
-            return ["per_page": 100]
+        case .list(let since, let limit):
+            return ["per_page": limit, "since": since]
         default:
             return nil
         }

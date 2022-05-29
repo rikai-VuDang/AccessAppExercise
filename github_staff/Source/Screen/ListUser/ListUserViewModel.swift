@@ -17,6 +17,7 @@ class ListUserViewModel {
     var users = BehaviorRelay<[UserModel]>(value: [])
     
     private var since = 0
+    private var isCanLoadmore = true
     private var activityIndicator = ActivityIndicator()
 }
 
@@ -43,6 +44,9 @@ extension ListUserViewModel {
             });
         let loadMoreTrigger = input.loadmore
             .asObservable()
+            .filter({ [weak self] _ in
+                return self?.isCanLoadmore ?? false
+            })
             .map({ [weak self] _ in
                 return self?.since ?? 0
             });
@@ -53,11 +57,12 @@ extension ListUserViewModel {
                     return Observable.empty()
                 }
                 return NetworkService
-                    .request(UserAPI.list(since: since), type: [UserModel].self)
+                    .request(UserAPI.list(since: since, limit: Constant.pageLimit), type: [UserModel].self)
                     .trackActivity(self.activityIndicator)
             })
             .asDriverJustComplete()
             .do(onNext: { [weak self] data in
+                self?.isCanLoadmore = (data?.count ?? 0) >= Constant.pageLimit
                 self?.since += Constant.pageLimit
                 var currentUsers = self?.users.value ?? []
                 currentUsers.append(contentsOf: data ?? [])
